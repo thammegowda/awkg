@@ -5,11 +5,13 @@
 sometimes get in our way. 
 `awkg` follows the steps of  `awk`'s design (including its name convention😉)
 and exposes full power of the modern day python. 
+Python's large set of off-the-shelf existing libraries can of course be imported and used. 
 
 # Todo: 
 
 ```
- $ python -m awkg -h 
+$ alias awkg="$PWD/awkg/awkg.py"
+ $ awkg -h
 usage: __main__.py [-h] [-i INP] [-o OUT] [-F FS] [-OFS OFS] [-RS RS]
                    [-ORS ORS] [-b BEGIN_SCRIPT] [-e END_SCRIPT] [-im IMPORTS]
                    [-it INIT_PATH]
@@ -59,32 +61,32 @@ alias awkg="$PWD/awkg/awkg.py"
 ```python
  
 
-cat data/train.src | python -m awkg -b 'arr=[]; import numpy as np' 'arr.append(NF)' \
+cat data/train.src | awkg -b 'arr=[]; import numpy as np' 'arr.append(NF)' \
    -e 'arr=np.array(arr); print(f"{NR} lines from {FNAME}, mean={arr.mean():.2f}; std={arr.std():.4f}")'
 ```
 ### Filter records
 ```
 # use print() explicitely 
-cat data/train.src  | python -m awkg  'if NF >= 25: print(*R)' 
+cat data/train.src  | awkg  'if NF >= 25: print(*R)' 
 
 Assign boolean expression to special variable RET to trigger implicit print 
-cat data/train.src  |  python -m awkg  'RET = NF >= 25'
+cat data/train.src  | awkg  'RET = NF >= 25'
 
 # print respects the OFS value
-cat data/train.src  |   python -m awkg  'if NF >= 25: print(NR, NF)' -OFS='\t'
+cat data/train.src  |  awkg  'if NF >= 25: print(NR, NF)' -OFS='\t'
 ```
 
 ## Special Variables
-+ NF  : Number of fields
-+ NR  : Record number 
-+ R   : An array having all the columns of current record.
-+ R0  : analogous to `$0` it stores the input line before splitting into `R`; since python doesnt support $ in identifiers, renamed to R0
-+ RET : When this variable is set to Truth value of `true` implicit `print(*R)` is triggered
-+ FS : Input Field separator
-+ OFS : Output Field separator
-+ ORS : Output Record separator
-+ RS (Currently Not in use)
-+ _locals , _globals - all variables in local and global scope
++ `NF`  : Number of fields
++ `NR`  : Record number 
++ `R`   : An array having all the columns of current record.
++ `R0`  : analogous to `$0` it stores the input line before splitting into `R`; since python doesnt support $ in identifiers, renamed to R0
++ `RET` : When this variable is set to Truth value of `true` implicit `print(*R)` is triggered
++ `FS` : Input Field separator
++ `OFS` : Output Field separator; Unless explicitly set, `OFS=FS`
++ `ORS` : Output Record separator
++ `RS` (Currently Not in use)
++ `_locals` , `_globals` - all variables in local and global scope
 
 You are allowed to use any valid python identifiers, than the above variables
 
