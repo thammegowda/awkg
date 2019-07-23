@@ -9,10 +9,11 @@ from typing import Optional
 from pathlib import Path
 import sys
 import codecs
-
 import os
 import re
 import io
+
+from . import __version__, __description__
 
 log.basicConfig(level=log.INFO)
 
@@ -117,18 +118,21 @@ class AWKG:
         def unescaped_str(arg_str):
             return codecs.decode(str(arg_str), 'unicode_escape') if arg_str else arg_str
 
-        p = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        p = argparse.ArgumentParser(prog='awkg', description=__description__)
         p.add_argument('-i', '--inp', type=Path, default=None, help='Input file path; None=STDIN')
 
         p.add_argument('-o', '--out', type=Path, default=None, help='Output file path; None=STDOUT')
 
-        p.add_argument('-F', '-FS', '--field-separator', dest='FS', type=unescaped_str, default=None,
+        p.add_argument('-F', '-FS', '--field-sep', dest='FS', type=unescaped_str,
+                       default=None,
                        help='the input field separator. Default=None implies white space', )
-        p.add_argument('-OFS', '--out-field-separator', dest='OFS', type=unescaped_str, default=None,
+        p.add_argument('-OFS', '--out-field-sep', dest='OFS', type=unescaped_str,
+                       default=None,
                        help='the out field separator. Default=None implies same as input FS.')
-        p.add_argument('-RS', '--record-separator', dest='RS', type=unescaped_str, default=None,
-                       help='the input record separator. Default=None implies universal newline.')
-        p.add_argument('-ORS', '--out-record-separator', dest='ORS', type=unescaped_str, default=None,
+        # p.add_argument('-RS', '--record-separator', dest='RS', type=unescaped_str, default=None,
+        #               help='the input record separator. Default=None implies universal newline.')
+        p.add_argument('-ORS', '--out-rec-sep', dest='ORS', type=unescaped_str,
+                       default=None,
                        help='the output record separator. Default=None implies same as input RS.')
         p.add_argument('inline_script', type=str, help="Inline python script")
 
@@ -137,21 +141,27 @@ class AWKG:
         p.add_argument('-e', '--end', dest='end_script', type=str,
                        help="END block. Print summaries or whatever")
         p.add_argument('-im', '--import', dest='imports', type=str,
-                       help="Imports block. Just specify the module names to be imported. "
+                       help="Imports block. Specify a list of module names to be imported."
                             "Semicolon (;) is the delimiter. Ex: json;numpy as np")
         p.add_argument('-it', '--init', dest='init_path', type=Path,
-                       default=AWKG.default_init, help="The rc file that initializes environment")
+                       default=AWKG.default_init, help="The rc file that initializes environment."
+                                                       "Default is $HOME/.awkg.py")
+        p.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}')
         args = vars(p.parse_args(args=args))
         return args
 
     @classmethod
-    def main(cls, inline_script, begin_script=None, end_script=None, imports=None, **args):
+    def run(cls, inline_script, begin_script=None, end_script=None, imports=None, **args):
         awk = cls(**args)
         awk.imports(imports)
         awk.begin(begin_script)
         awk.run_recs(inline_script)
         awk.end(end_script)
 
+    @staticmethod
+    def main():
+        AWKG.run(**AWKG.parse_args())
+
 
 if __name__ == '__main__':
-    AWKG.main(**AWKG.parse_args())
+    AWKG.main()

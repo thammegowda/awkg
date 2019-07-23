@@ -6,4 +6,5 @@
 from awkg import AWKG
 
 if __name__ == '__main__':
-    AWKG.main(**AWKG.parse_args())
+    AWKG.main()
+
