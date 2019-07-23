@@ -1,9 +1,8 @@
 # awkg
 
-`awkg` is a `awk` like utility using modern day python language.
+`awkg` is an `awk` like utility using modern day python language.
 `awk` is amazingly simple, fast and quite handy. However, its domain specific constrain 
-sometimes get in our way. 
-`awkg` follows the steps of  `awk`'s design (including its convention for name😉)
+sometimes get in our way. `awkg` follows the steps of  `awk`'s design (including its convention for name😉)
 and exposes full power of the modern day python. 
 Python's large set of off-the-shelf existing libraries can of course be imported and used. 
 
@@ -93,6 +92,13 @@ cat data/train.src  |  awkg  'if NF >= 25: print(NR, NF)' -OFS='\t'
 + `_locals` , `_globals` - all variables in local and global scope
 
 You are allowed to use any valid python identifiers, than the above variables
+
+## Default import modules 
+These modules are imported by default
++ `sys`
++ `os`
++ `re`
++ `from pathlib import Path`
 
 
 ## Author:

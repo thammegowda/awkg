@@ -45,10 +45,6 @@ class AWKG:
         self.locals = dict(FS=self.FS, RS=self.RS, OFS=self.OFS, ORS=self.ORS,
                            print=self._print, out=self.out, re=re, sys=sys, os=os, Path=Path,
                            FNAME=self.inp.name)
-
-        self.locals['_locals'] = self.locals  # cyclic reference trick; to update from inside script
-        self.globals['_globals'] = self.globals
-
         if init_path:
             if not init_path.exists():
                 if init_path == self.default_init:
@@ -57,16 +53,11 @@ class AWKG:
                     log.error(f"Specified init file {init_path} not found")
             else:
                 init_script = init_path.read_text(encoding=encoding, errors=enc_errors)
-                self.execute(self._prepare_script(init_script))
-
-        # TODO: add ~/.awkg.rc
+                self.execute(init_script)
 
     def _print(self, *args):
         rec = self.OFS.join(x if isinstance(x, str) else str(x) for x in args)
         self.out.write(rec + self.ORS)
-
-    def _prepare_script(self, script):
-        return script + "\n\n_locals.update(locals())\n_globals.update(globals());"
 
     def imports(self, script: Optional[str] = None):
         if script:
@@ -77,7 +68,7 @@ class AWKG:
                     pass  # full specified
                 else:
                     parts[i] = ('from ' if ' import ' in p else 'import ') + p
-            script = self._prepare_script(';'.join(parts))
+            script = ';'.join(parts)
             self.execute(script)
 
     def begin(self, script: Optional[str] = None):
@@ -98,7 +89,6 @@ class AWKG:
             self._print(*self.locals['R'])
 
     def run_recs(self, script: str):
-        script = self._prepare_script(script)
         compiled = compile(source=script, filename='inline_script', mode='exec')
         self.NR = 0
         for rec in self.inp:
@@ -107,7 +97,6 @@ class AWKG:
 
     def end(self, script: Optional[str] = None):
         if script:
-            script = self._prepare_script(script)
             self.execute(script)
         self.out.close()
         self.inp.close()
@@ -160,7 +149,10 @@ class AWKG:
 
     @staticmethod
     def main():
-        AWKG.run(**AWKG.parse_args())
+        try:
+            AWKG.run(**AWKG.parse_args())
+        except KeyboardInterrupt as e:
+            pass  # keyboard interrupts are cool
 
 
 if __name__ == '__main__':
