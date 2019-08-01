@@ -29,7 +29,7 @@ class AWKG:
         self.OFS = OFS or FS or ' '
         self.ORS = ORS or RS or '\n'
         if inp:
-            inp.open('r', encoding=encoding, newline=self.RS, errors=enc_errors)
+            self.inp = inp.open('r', encoding=encoding, newline=self.RS, errors=enc_errors)
         else:
             self.inp = io.TextIOWrapper(buffer=sys.stdin.buffer, encoding=encoding,
                                         errors=enc_errors, newline=self.RS)
