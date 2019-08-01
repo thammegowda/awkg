@@ -1,3 +1,5 @@
+## v0.3.0 : 20190801
++ input argument from `-i` `--inp`
 
 ## v0.2.0 : 20190723
 + handle KeyboardInterrupt :  no need to print stack trace
